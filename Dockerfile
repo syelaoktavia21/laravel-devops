@@ -1,36 +1,15 @@
-FROM serversideup/php:8.3-fpm-nginx AS base
+FROM php:8.3-fpm
 
-# Switch to root so we can do root things
-USER root
+RUN apt-get update && apt-get install -y \
+    git libpng-dev libonig-dev libxml2-dev libzip-dev zip unzip \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
-# Install the exif extension with root permissions
-RUN install-php-extensions exif
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Install JavaScript dependencies
-ARG NODE_VERSION=20.18.0
-ENV PATH=/usr/local/node/bin:$PATH
-RUN curl -sL https://github.com/nodenv/node-build/archive/master.tar.gz | tar xz -C /tmp/ && \
-    /tmp/node-build-master/bin/node-build "${NODE_VERSION}" /usr/local/node && \
-    corepack enable && \
-    rm -rf /tmp/node-build-master
+WORKDIR /var/www
+COPY . .
 
-# Drop back to our unprivileged user
-USER www-data
+RUN composer install --optimize-autoloader --no-dev
+RUN chown -R www-data:www-data storage bootstrap/cache
 
-FROM base
 
-ENV SSL_MODE="off"
-ENV AUTORUN_ENABLED="true"
-ENV PHP_OPCACHE_ENABLE="1"
-ENV HEALTHCHECK_PATH="/up"
-
-# Copy the app files...
-COPY --chown=www-data:www-data . /var/www/html
-
-# Re-run install, but now with scripts and optimizing the autoloader (should be faster)...
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
-
-# Precompiling assets for production
-RUN yarn install --immutable && \
-    yarn build && \
-    rm -rf node_modules
