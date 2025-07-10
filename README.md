@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Laravel 11.x blog
 
 The purpose of this repository is to show good development practices on [Laravel](http://laravel.com/) as well as to present cases of use of the framework's features like:
@@ -164,3 +165,7 @@ Do not hesitate to contribute to the project by adapting or adding features ! Bu
 ## License
 
 This project is released under the [MIT](http://opensource.org/licenses/MIT) license.
+=======
+# laravel-devops
+I make my own server and fork https://github.com/guillaumebriday/laravel-blog
+>>>>>>> 0c2741ecc07523f0cffab9cb2c77fdbb6ecbba0c
