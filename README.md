@@ -1,171 +1,201 @@
-<<<<<<< HEAD
-# Laravel 11.x blog
+# Laravel Blog Deployment using Docker Compose & Nginx Reverse Proxy
 
-The purpose of this repository is to show good development practices on [Laravel](http://laravel.com/) as well as to present cases of use of the framework's features like:
+## Server Setup (VM)
+### Creating the VM in VirtualBox
+- **VM Name**: `devops-vm`
+- **OS Type**: Linux / Ubuntu (64-bit)
+- **Resources**:
+  - RAM: 2048 MB
+  - CPU: 2 Cores
+  - Storage: 25 GB (Dynamic allocation)
+- **Network**: NAT (Intel PRO/1000 MT Desktop)
+- **Boot Order**: Optical → Hard Disk
+- **Acceleration**: Nested Paging + KVM
 
-- [Authentication](https://laravel.com/docs/11.x/authentication)
-- API
-  - [Sanctum](https://laravel.com/docs/11.x/sanctum)
-  - [API Resources](https://laravel.com/docs/11.x/eloquent-resources)
-  - Versioning
-- [Blade](https://laravel.com/docs/11.x/blade)
-- [Broadcasting](https://laravel.com/docs/11.x/broadcasting)
-- [Cache](https://laravel.com/docs/11.x/cache)
-- [Email Verification](https://laravel.com/docs/11.x/verification)
-- [Filesystem](https://laravel.com/docs/11.x/filesystem)
-- [Helpers](https://laravel.com/docs/11.x/helpers)
-- [Horizon](https://laravel.com/docs/11.x/horizon)
-- [Localization](https://laravel.com/docs/11.x/localization)
-- [Mail](https://laravel.com/docs/11.x/mail)
-- [Migrations](https://laravel.com/docs/11.x/migrations)
-- [Policies](https://laravel.com/docs/11.x/authorization)
-- [Providers](https://laravel.com/docs/11.x/providers)
-- [Requests](https://laravel.com/docs/11.x/validation#form-request-validation)
-- [Seeding & Factories](https://laravel.com/docs/11.x/seeding)
-- [Testing](https://laravel.com/docs/11.x/testing)
-- [Homestead](https://laravel.com/docs/11.x/homestead)
+### Installation Steps
+1. Mount Ubuntu Server 24.04 LTS ISO
+2. Create virtual hard disk (VHD) with dynamic allocation
+3. Start VM and follow Ubuntu Server installation wizard
+4. Configure network settings during installation
 
-Beside Laravel, this project uses other tools like:
+## Linux System Hardening & Optimization
+### Operating System Hardening
+> sudo apt update && sudo apt upgrade -y
+> sudo apt install unattended-upgrades
+> sudo dpkg-reconfigure unattended-upgrades
+> sudo aa-status  # Verify AppArmor
 
-- [Bootstrap 5.x](https://getbootstrap.com/)
-- [Pint](https://github.com/laravel/pint)
-- [Font Awesome](https://fontawesome.com/)
-- [Hotwired](https://hotwired.dev/)
-- [Redis](https://redis.io/)
-- [spatie/laravel-medialibrary](https://github.com/spatie/laravel-medialibrary)
-- [hotwired-laravel/turbo-laravel](https://github.com/hotwired-laravel/turbo-laravel)
-- Many more to discover.
+## SSH Security
+> sudo nano /etc/ssh/sshd_config
+Change: 
+[ - Port 2222
+- PermitRootLogin no ]
+> sudo ufw allow 2222
+> sudo systemctl restart sshd
 
-## Some screenshots
+## User Account Hardening
+Remove unused users:
+sudo deluser --remove-home <username>
 
-You can find some screenshots of the application on : [https://imgur.com/a/Jbnwj](https://imgur.com/a/Jbnwj)
+## Password policies:
+sudo passwd <username>
 
-## Installation
+## MFA Setup:
+> sudo apt install libpam-google-authenticator
+> google-authenticator  # Run as user
+> sudo nano /etc/pam.d/sshd
 
-To create your development environment [follow these instructions](https://laravel.com/docs/11.x/installation#local-installation-using-herd).
+## Add: auth required pam_google_authenticator.so
+Kernel & Performance Tuning
+> sudo nano /etc/sysctl.conf
 
-Setting up your development environment on your local machine:
-```bash
-$ git clone https://github.com/guillaumebriday/laravel-blog.git
-$ cd laravel-blog
-$ cp .env.example .env
-$ php artisan key:generate
-$ php artisan horizon:install
-$ php artisan telescope:install
-$ php artisan storage:link
-```
+### Add:
+[ - net.ipv4.tcp_syncookies=1
+- vm.swappiness=10
+- kernel.kptr_restrict=2 ]
+> sudo sysctl -p
 
-Now open [http://laravel-blog.test](http://laravel-blog.test).
+### Firewall Configuration:
+> sudo ufw allow OpenSSH
+> sudo ufw allow 80/tcp
+> sudo ufw allow 443/tcp
+> sudo ufw enable
 
-### Mailer
 
-You can use [Mailpit](https://github.com/axllent/mailpit) to test your emails in development.
+## Nginx Hardening & Optimization
+TLS Configuration (self-signed)
+> sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout /etc/ssl/private/nginx-selfsigned.key \
+  -out /etc/ssl/certs/nginx-selfsigned.crt
 
-Once installed, open [http://localhost:8025](http://localhost:8025).
+## Security Headers (Add to Nginx config)
+nginx
+add_header Strict-Transport-Security "max-age=63072000" always;
+add_header X-Frame-Options "SAMEORIGIN";
+add_header X-Content-Type-Options "nosniff";
+add_header X-XSS-Protection "1; mode=block";
+server_tokens off;
+Rate Limiting
+nginx
+limit_req_zone $binary_remote_addr zone=one:10m rate=10r/s;
 
-## Before starting
-You need to run the migrations with the seeds :
-```bash
-$ php artisan migrate:fresh --seed
-```
+location / {
+    limit_req zone=one burst=20 nodelay;
+    ...
+}
 
-This will create a new user that you can use to sign in :
-```yml
-email: demo@demo.com
-password: demodemo
-```
+Dockerized Laravel Setup
+Project Structure
+text
+├── docker-compose.yml
+├── nginx/
+│   └── default.conf
+├── src/           # Laravel application
+└── Dockerfile
+Dockerfile
+dockerfile
+FROM php:8.2-fpm
 
-And then, compile the assets :
-```bash
-$ yarn dev
-```
+RUN apt-get update && apt-get install -y \
+    git \
+    zip \
+    unzip \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev
 
-Starting job for newsletter :
-```bash
-$ php artisan tinker
-> PrepareNewsletterSubscriptionEmail::dispatch();
-```
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
-## Useful commands
+RUN curl -sS https://getcomposer.org/installer | php -- \
+    --install-dir=/usr/local/bin --filename=composer
 
-Start Laravel Horizon:
-```bash
-$ php artisan horizon
-```
+WORKDIR /var/www
+COPY src/ /var/www
+RUN composer install
+docker-compose.yml
+yaml
+version: '3.8'
 
-Seeding the database :
-```bash
-$ php artisan db:seed
-```
+services:
+  app:
+    build: .
+    volumes:
+      - ./src:/var/www
+    environment:
+      - DB_HOST=database
+      - DB_DATABASE=laravel
+      - DB_USERNAME=root
+      - DB_PASSWORD=secret
 
-Running tests :
-```bash
-$ php artisan test
-```
+  webserver:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./src:/var/www
+      - ./nginx:/etc/nginx/conf.d
 
-Running Laravel Pint :
-```bash
-$ ./vendor/bin/pint --verbose --test
-```
+  database:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: laravel
+    volumes:
+      - dbdata:/var/lib/mysql
 
-Generating backup :
-```bash
-$ php artisan vendor:publish --provider="Spatie\Backup\BackupServiceProvider"
-$ php artisan backup:run
-```
+volumes:
+  dbdata:
+Nginx Reverse Proxy Config (nginx/default.conf)
+nginx
+server {
+    listen 80;
+    listen 443 ssl;
+    
+    ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
+    ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+    
+    server_name _;
+    root /var/www/public;
+    index index.php;
 
-Generating fake data :
-```bash
-$ php artisan db:seed --class=DevDatabaseSeeder
-```
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
 
-Discover package
-```bash
-$ php artisan package:discover
-```
+    location ~ \.php$ {
+        fastcgi_pass app:9000;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
 
-In development environment, rebuild the database :
-```bash
-$ php artisan migrate:fresh --seed
-```
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
 
-## Accessing the API
+## Deployment Steps
 
-Clients can access to the REST API. API requests require authentication via Bearer token.
+### Clone Laravel app:
+> git clone https://github.com/syelaoktavia21/laravel-blog.git src
+> Build containers:
+> docker-compose up -d --build
 
-Generate a new token:
+### Run Laravel migrations:
+> docker-compose exec app php artisan migrate
 
-```bash
-curl --location --request POST 'laravel-blog.test/api/v1/authenticate?email=your_email&password=your_password' \
-     --header 'X-Requested-With: XMLHttpRequest'
-```
+### Verify services:
+> docker-compose ps
+> Verification
+> Access https://<server-ip> (ignore SSL warning)
 
-And now you can use the `meta.access_token` key as your `Bearer` token:
+### Check headers using:
+[curl -I https://<server-ip>]
 
-```bash
-curl --location 'laravel-blog.test/api/v1/posts' \
-      --header 'X-Requested-With: XMLHttpRequest' \
-      --header 'Authorization: Bearer access_token'
-```
+## References
+1. Ubuntu System Hardening
 
-API are prefixed by `api` and the API version number like so `v1`.
+2. Red Hat Security Hardening
 
-Do not forget to set the `X-Requested-With` header to `XMLHttpRequest`. Otherwise, Laravel won't recognize the call as an AJAX request.
-
-To list all the available routes for API :
-
-```bash
-$ php artisan route:list --path=api
-```
-
-## Contributing
-
-Do not hesitate to contribute to the project by adapting or adding features ! Bug reports or pull requests are welcome.
-
-## License
-
-This project is released under the [MIT](http://opensource.org/licenses/MIT) license.
-=======
-# laravel-devops
-I make my own server and fork https://github.com/guillaumebriday/laravel-blog
->>>>>>> 0c2741ecc07523f0cffab9cb2c77fdbb6ecbba0c
+3. TLS Hardening Guide
