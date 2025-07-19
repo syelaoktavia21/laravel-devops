@@ -26,43 +26,46 @@ Why? Protect against common attacks and unauthorized access
   → Reduces brute-force attacks by 90% (Shodan.io stats)
 
 - **Firewall Rules**:
-sudo ufw allow 2222     # SSH
-sudo ufw allow 80/tcp   # HTTP
-sudo ufw allow 443/tcp  # HTTPS
-sudo ufw enable         # Block everything else
+  ```bash
+    sudo ufw allow 2222     # SSH
+    sudo ufw allow 80/tcp   # HTTP
+    sudo ufw allow 443/tcp  # HTTPS
+    sudo ufw enable         # Block everything else
 
 - **MFA Authentication**:
-- google-authenticator    # Generates QR code for Authy/Google Auth
+  ```bash
+    google-authenticator    # Generates QR code for Authy/Google Auth
   → Adds 2nd factor protection even if password is compromised
 
 - **Kernel Hardening**:
+  ```bash
 vm.swappiness=10        # Prefer RAM over disk (faster response)
 kernel.kptr_restrict=2  # Hide kernel memory addresses
 
 
 ### 3. Nginx Hardening 🌐
 **Why?** Web servers are primary attack targets
-`markdown
+    ```markdown
 - **TLS Configuration** (Even for self-signed):
   nginx
   ssl_protocols TLSv1.2 TLSv1.3;       # Disable old protocols
   ssl_ciphers 'ECDHE-ECDSA-AES256-GCM-SHA384:...'; # Strong ciphers
 
 - **Security Headers**:
-
-- **Security Headers**:
+  ```bash
 add_header X-Frame-Options "SAMEORIGIN";      # Anti-clickjacking
 add_header Content-Security-Policy "default-src 'self'"; # XSS protection
 server_tokens off;                            # Hide version
 
 - **DDoS Protection**:
+  ```bash
   limit_req_zone $binary_remote_addr zone=one:10m rate=10r/s;
   → Limits to 10 requests/second/IP (adjust for real traffic)
 
 
 ### 4. Dockerized Architecture 🐳
 **Why?** Consistent environments from dev to production
-markdown
+    ```markdown
 - **3-Tier Structure**:
   1. `app`: PHP-FPM container (Laravel runtime)
   2. `webserver`: Nginx reverse proxy
@@ -85,20 +88,25 @@ markdown
 
 - **6. Deployment Workflow 🚀**:
 # 1. Clone Laravel
+    ```bash
 git clone https://github.com/your-repo.git src
 
 # 2. Build containers
+    ```bash
 docker-compose up -d --build
 
 # 3. Initialize database
+    ```bash
 docker-compose exec app php artisan migrate
 
 
 - **Security Verification ✅**:
+     ```bash
 curl -I https://your-server
 
 
 - **Expected Headers**:
+     ```bash
 Strict-Transport-Security: max-age=63072000
 X-Frame-Options: SAMEORIGIN
 X-Content-Type-Options: nosniff
