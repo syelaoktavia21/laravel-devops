@@ -90,28 +90,28 @@ Why? Protect against common attacks and unauthorized access
 
 ## 6. Deployment Workflow 🚀:
 - **1. Clone Laravel**
-        ```bash
-        git clone https://github.com/your-repo.git src
+  ```bash
+  git clone https://github.com/your-repo.git src
 
 - **2. Build containers**
-        ```bash
-        docker-compose up -d --build
+  ```bash
+  docker-compose up -d --build
 
 - **3. Initialize database**
-        ```bash
-        docker-compose exec app php artisan migrate
+  ```bash
+  docker-compose exec app php artisan migrate
 
 
 - **Security Verification ✅**:
-    ```bash
-    curl -I https://your-server
+  ```bash
+  curl -I https://your-server
 
 
 - **Expected Headers**:
-    ```bash
-    Strict-Transport-Security: max-age=63072000
-    X-Frame-Options: SAMEORIGIN
-    X-Content-Type-Options: nosniff
+  ```bash
+  Strict-Transport-Security: max-age=63072000
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
 
 ## Why This Architecture? 🏆
     ```markdown
