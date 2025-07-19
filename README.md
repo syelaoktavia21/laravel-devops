@@ -1,7 +1,7 @@
 Laravel Blog Deployment using Docker Compose & Nginx Reverse Proxy
 I'll explain each section of the deployment process in detail:
 
-1. Server Setup (VM) 💻
+## 1. Server Setup (VM) 💻
 Why? We need a clean, isolated environment for our application
 
 - **VirtualBox Configuration**:
@@ -15,7 +15,7 @@ Why? We need a clean, isolated environment for our application
   2. Basic network config (DHCP)
   3. Create admin user (disable root login later)
  
-2. Linux Hardening 🔒
+## 2. Linux Hardening 🔒
 Why? Protect against common attacks and unauthorized access
 
 - **SSH Security**:
@@ -43,7 +43,7 @@ Why? Protect against common attacks and unauthorized access
       kernel.kptr_restrict=2  # Hide kernel memory addresses
 
 
-### 3. Nginx Hardening 🌐
+## 3. Nginx Hardening 🌐
 **Why?** Web servers are primary attack targets
     ```markdown
     - **TLS Configuration** (Even for self-signed):
@@ -64,7 +64,7 @@ Why? Protect against common attacks and unauthorized access
 → Limits to 10 requests/second/IP (adjust for real traffic)
 
 
-### 4. Dockerized Architecture 🐳
+## 4. Dockerized Architecture 🐳
 **Why?** Consistent environments from dev to production
     ```markdown
     - **3-Tier Structure**:
@@ -77,27 +77,27 @@ Why? Protect against common attacks and unauthorized access
   - Version pinning: php:8.2-fpm, nginx:alpine
   - Persistent storage: MySQL data survives container restarts
 
-- **5. Reverse Proxy Magic 🔄**:
-  ```bash
-  How Nginx talks to Laravel:
-  location ~ \.php$ {
-    fastcgi_pass app:9000;   # Connects to PHP-FPM container
-    include fastcgi_params;  # Passes request metadata
+## 5. Reverse Proxy Magic 🔄:
+    ```bash
+      How Nginx talks to Laravel:
+      location ~ \.php$ {
+        fastcgi_pass app:9000;   # Connects to PHP-FPM container
+        include fastcgi_params;  # Passes request metadata
+        }
 
-}
 → Nginx handles static files directly (CSS/JS/images)
 → PHP requests routed to Laravel processor
 
-- **6. Deployment Workflow 🚀**:
-    - **1. Clone Laravel**
+## 6. Deployment Workflow 🚀:
+- **1. Clone Laravel**
         ```bash
         git clone https://github.com/your-repo.git src
 
-    - **2. Build containers**
+- **2. Build containers**
         ```bash
         docker-compose up -d --build
 
-    - **3. Initialize database**
+- **3. Initialize database**
         ```bash
         docker-compose exec app php artisan migrate
 
