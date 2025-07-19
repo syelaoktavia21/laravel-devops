@@ -89,25 +89,25 @@ Why? Protect against common attacks and unauthorized access
 
 - **6. Deployment Workflow 🚀**:
 # 1. Clone Laravel
-```bash
+    ```bash
     git clone https://github.com/your-repo.git src
 
 # 2. Build containers
-```bash
+    ```bash
     docker-compose up -d --build
 
 # 3. Initialize database
-```bash
+    ```bash
     docker-compose exec app php artisan migrate
 
 
 - **Security Verification ✅**:
-```bash
+    ```bash
     curl -I https://your-server
 
 
 - **Expected Headers**:
-```bash
+    ```bash
     Strict-Transport-Security: max-age=63072000
     X-Frame-Options: SAMEORIGIN
     X-Content-Type-Options: nosniff
