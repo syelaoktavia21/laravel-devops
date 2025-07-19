@@ -27,20 +27,20 @@ Why? Protect against common attacks and unauthorized access
 
 - **Firewall Rules**:
   ```bash
-    sudo ufw allow 2222     # SSH
-    sudo ufw allow 80/tcp   # HTTP
-    sudo ufw allow 443/tcp  # HTTPS
-    sudo ufw enable         # Block everything else
+  sudo ufw allow 2222     # SSH
+  sudo ufw allow 80/tcp   # HTTP
+  sudo ufw allow 443/tcp  # HTTPS
+  sudo ufw enable         # Block everything else
 
 - **MFA Authentication**:
   ```bash
-    google-authenticator    # Generates QR code for Authy/Google Auth
+  google-authenticator    # Generates QR code for Authy/Google Auth
   → Adds 2nd factor protection even if password is compromised
 
 - **Kernel Hardening**:
   ```bash
-vm.swappiness=10        # Prefer RAM over disk (faster response)
-kernel.kptr_restrict=2  # Hide kernel memory addresses
+  vm.swappiness=10        # Prefer RAM over disk (faster response)
+  kernel.kptr_restrict=2  # Hide kernel memory addresses
 
 
 ### 3. Nginx Hardening 🌐
