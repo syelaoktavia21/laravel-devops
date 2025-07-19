@@ -113,29 +113,29 @@ Why? Protect against common attacks and unauthorized access
     X-Frame-Options: SAMEORIGIN
     X-Content-Type-Options: nosniff
 
-# Why This Architecture? 🏆
+## Why This Architecture? 🏆
     ```markdown
-    1. Security: Multiple layers of protection (MFA, firewall, TLS)
+        1. Security: Multiple layers of protection (MFA, firewall, TLS)
 
-    2. Performance: Nginx static file handling + PHP-FPM optimization
+        2. Performance: Nginx static file handling + PHP-FPM optimization
 
-    3. Maintainability:
+        3. Maintainability:
 
-        - Docker containers = easy updates
-        - Infrastructure-as-Code (docker-compose.yml)
+            - Docker containers = easy updates
+            - Infrastructure-as-Code (docker-compose.yml)
 
-    4. Scalability:
+        4. Scalability:
 
-        - Add more PHP containers behind Nginx
-        - Swap MySQL for cloud database
+            - Add more PHP containers behind Nginx
+            - Swap MySQL for cloud database
 
 - **Real-World Considerations 🌍**:
   ```markdown
-    Production SSL: Replace self-signed with Let's Encrypt
-    Secrets Management: Use Docker secrets/vaults for DB passwords
-    Logging: Add ELK stack for container log monitoring
-    Backups: Cron jobs for MySQL dumps + volume backups
-    This setup provides enterprise-grade security while maintaining developer-friendly workflows. The Docker-Nginx combo ensures your Laravel app runs efficiently while being protected against common web vulnerabilities.
+    - Production SSL: Replace self-signed with Let's Encrypt
+    - Secrets Management: Use Docker secrets/vaults for DB passwords
+    - Logging: Add ELK stack for container log monitoring
+    - Backups: Cron jobs for MySQL dumps + volume backups
+    - This setup provides enterprise-grade security while maintaining developer-friendly workflows. The Docker-Nginx combo ensures your Laravel app runs efficiently while being protected against common web vulnerabilities.
 
 
   
