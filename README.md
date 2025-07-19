@@ -46,10 +46,10 @@ Why? Protect against common attacks and unauthorized access
 ### 3. Nginx Hardening 🌐
 **Why?** Web servers are primary attack targets
     ```markdown
-- **TLS Configuration** (Even for self-signed):
-  nginx
-  ssl_protocols TLSv1.2 TLSv1.3;       # Disable old protocols
-  ssl_ciphers 'ECDHE-ECDSA-AES256-GCM-SHA384:...'; # Strong ciphers
+    - **TLS Configuration** (Even for self-signed):
+    nginx
+      ssl_protocols TLSv1.2 TLSv1.3;       # Disable old protocols
+      ssl_ciphers 'ECDHE-ECDSA-AES256-GCM-SHA384:...'; # Strong ciphers
 
 - **Security Headers**:
   ```bash
@@ -60,16 +60,17 @@ Why? Protect against common attacks and unauthorized access
 - **DDoS Protection**:
   ```bash
       limit_req_zone $binary_remote_addr zone=one:10m rate=10r/s;
-  → Limits to 10 requests/second/IP (adjust for real traffic)
+  
+→ Limits to 10 requests/second/IP (adjust for real traffic)
 
 
 ### 4. Dockerized Architecture 🐳
 **Why?** Consistent environments from dev to production
     ```markdown
-- **3-Tier Structure**:
-  1. `app`: PHP-FPM container (Laravel runtime)
-  2. `webserver`: Nginx reverse proxy
-  3. `database`: MySQL container
+    - **3-Tier Structure**:
+      1. `app`: PHP-FPM container (Laravel runtime)
+      2. `webserver`: Nginx reverse proxy
+      3. `database`: MySQL container
 
 - **Key Benefits**:
   - Isolation: Each service in separate container
@@ -88,17 +89,17 @@ Why? Protect against common attacks and unauthorized access
 → PHP requests routed to Laravel processor
 
 - **6. Deployment Workflow 🚀**:
-# 1. Clone Laravel
-    ```bash
-    git clone https://github.com/your-repo.git src
+    - **1. Clone Laravel**
+        ```bash
+        git clone https://github.com/your-repo.git src
 
-# 2. Build containers
-    ```bash
-    docker-compose up -d --build
+    - **2. Build containers**
+        ```bash
+        docker-compose up -d --build
 
-# 3. Initialize database
-    ```bash
-    docker-compose exec app php artisan migrate
+    - **3. Initialize database**
+        ```bash
+        docker-compose exec app php artisan migrate
 
 
 - **Security Verification ✅**:
@@ -112,33 +113,29 @@ Why? Protect against common attacks and unauthorized access
     X-Frame-Options: SAMEORIGIN
     X-Content-Type-Options: nosniff
 
-- **Why This Architecture? 🏆**:
-1. Security: Multiple layers of protection (MFA, firewall, TLS)
+# Why This Architecture? 🏆
+    ```markdown
+    1. Security: Multiple layers of protection (MFA, firewall, TLS)
 
-2. Performance: Nginx static file handling + PHP-FPM optimization
+    2. Performance: Nginx static file handling + PHP-FPM optimization
 
-3. Maintainability:
+    3. Maintainability:
 
-- Docker containers = easy updates
+        - Docker containers = easy updates
+        - Infrastructure-as-Code (docker-compose.yml)
 
-- Infrastructure-as-Code (docker-compose.yml)
+    4. Scalability:
 
-4. Scalability:
-
-- Add more PHP containers behind Nginx
-
-- Swap MySQL for cloud database
+        - Add more PHP containers behind Nginx
+        - Swap MySQL for cloud database
 
 - **Real-World Considerations 🌍**:
-Production SSL: Replace self-signed with Let's Encrypt
-
-Secrets Management: Use Docker secrets/vaults for DB passwords
-
-Logging: Add ELK stack for container log monitoring
-
-Backups: Cron jobs for MySQL dumps + volume backups
-
-This setup provides enterprise-grade security while maintaining developer-friendly workflows. The Docker-Nginx combo ensures your Laravel app runs efficiently while being protected against common web vulnerabilities.
+  ```markdown
+    Production SSL: Replace self-signed with Let's Encrypt
+    Secrets Management: Use Docker secrets/vaults for DB passwords
+    Logging: Add ELK stack for container log monitoring
+    Backups: Cron jobs for MySQL dumps + volume backups
+    This setup provides enterprise-grade security while maintaining developer-friendly workflows. The Docker-Nginx combo ensures your Laravel app runs efficiently while being protected against common web vulnerabilities.
 
 
   
