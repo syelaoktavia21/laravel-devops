@@ -1,3 +1,4 @@
+Documentation : https://docs.google.com/document/d/1p_IhlJnpiRhGyR4DYUjZg9nFPRwGczd4Z5ddZ989Td4/edit?usp=drivesdk
 Laravel Blog Deployment using Docker Compose & Nginx Reverse Proxy
 I'll explain each section of the deployment process in detail:
 
